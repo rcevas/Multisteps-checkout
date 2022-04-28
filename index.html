@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+  <title>Hello, world!</title>
+
+  <style>
+.form-checkout a {
+  cursor: pointer;
+}
+
+/* Progressbar */
+.form-checkout .progressbar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  counter-reset: step;
+  margin: 2rem 0 4rem;
+}
+
+.form-checkout .progressbar::before,
+.form-checkout .progress {
+  content: "";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  background-color: #D8D8D8;
+  z-index: -1;
+}
+
+.form-checkout .progress {
+  background-color: #005FA9;
+  width: 0%;
+  transition: 0.3s;
+}
+
+.form-checkout .progress-step {
+  width: 2.1875rem;
+  height: 2.1875rem;
+  background-color: #D8D8D8;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-checkout .progress-step::before {
+  counter-increment: step;
+  content: counter(step);
+}
+
+.form-checkout .progress-step::after {
+  content: attr(data-title);
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  font-size: var(--font-size-base);
+  color: #868686;
+}
+
+.form-checkout .progress-step-active {
+  background-color: #005FA9;
+  color: #f3f3f3;
+}
+
+.form-checkout .form-step {
+  display: none;
+  transform-origin: top;
+  animation: animate 0.5s;
+}
+
+.form-checkout .form-step-active {
+  display: block;
+}
+
+@keyframes animate {
+  from {
+    transform: scale(1, 0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1, 1);
+    opacity: 1;
+  }
+}
+
+.form-checkout .border {
+  box-shadow: 0 6px 18px #929292;
+}
+
+.form-checkout #selectEnvioPais,
+.form-checkout #selectFacturaPais {
+  width: 48%;
+}
+
+.form-checkout .resumenInfoEnvio {
+  line-height: 0.5rem;
+  background-color: #fff;
+}
+
+.form-checkout .resumenInfoCarro {
+  background-color: #fff;
+}
+
+.form-checkout .text-grey {
+  color: #868686;
+}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <form class="form form-checkout" id="checkoutForm">
+      <!-- Progress bar -->
+      <div class="progressbar">
+        <div class="progress" id="progress"></div>
+
+        <div class="progress-step progress-step-active" data-title="Dirección de Envío"></div>
+        <div class="progress-step" data-title="Datos de Facturación"></div>
+        <div class="progress-step" data-title="Resumen Pedido"></div>
+        <div class="progress-step" data-title="Confirmación Pedido"></div>
+      </div>
+
+      <!-- Steps -->
+      <div class="form-step form-step-active">
+        <div class="form-group w-50">
+          <label for="exampleFormControlSelect1">Elegir Dirección de Envío</label>
+          <select class="form-control" id="selectDireccionEnvio" onchange="detectAgendaChange(this)"></select>
+        </div>
+        <div class="form-group d-flex my-4">
+          <input type="text" class="form-control" id="inputEnvioNombre" placeholder="Nombre*" required />
+          <input type="text" class="form-control mx-3" id="inputEnvioDni" placeholder="CIF/DNI*" required />
+          <input type="text" class="form-control" id="inputEnvioTel" placeholder="Número de Teléfono*" required />
+        </div>
+        <div class="form-group d-flex">
+          <input type="text" class="form-control" id="inputEnvioDireccion" placeholder="Dirección*" required />
+          <select class="form-control ml-3" id="selectEnvioPais" required>
+            <option value="" disabled selected>País*</option>
+            <option value="España">España</option>
+            <option value="Francia">Francia</option>
+          </select>
+        </div>
+        <div class="form-group d-flex">
+          <a role="button" class="biblio-btn-link btn-add-line">+ Añadir una linea</a>
+          <input type="text" class="form-control d-none" id="inputEnvioDireccion2" placeholder="Dirección" />
+        </div>
+        <div class="form-group d-flex my-4">
+          <input type="text" class="form-control" id="inputEnvioCP" placeholder="Código Postal*" required />
+          <input type="text" class="form-control mx-3" id="inputEnvioCiudad" placeholder="Ciudad*" required />
+          <select class="form-control" id="selectEnvioProvincia" required>
+            <option value="" disabled selected>Provincia*</option>
+            <option value="Barcelona">Barcelona</option>
+            <option value="Madrid">Madrid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="checkEnvioDatos" />
+            <label class="form-check-label" for="checkEnvioDatos">
+              Los datos de envío son los mismos que los datos de facturación
+            </label>
+          </div>
+        </div>
+        <div class="text-center my-4">
+          <a role="button" class="btn biblio-btn-primary px-5 btn-next btn-paso-1">Continuar</a>
+        </div>
+      </div>
+      <div class="form-step">
+        <div class="form-group d-flex my-4">
+          <input type="text" class="form-control" id="inputFacturaNombre" placeholder="Nombre*" required />
+          <input type="text" class="form-control mx-3" id="inputFacturaDni" placeholder="CIF/DNI*" required />
+          <input type="text" class="form-control" id="inputFacturaTel" placeholder="Número de Teléfono*" required />
+        </div>
+        <div class="form-group d-flex">
+          <input type="text" class="form-control" id="inputFacturaDireccion" placeholder="Dirección*" required />
+          <select class="form-control ml-3" id="selectFacturaPais" required>
+            <option value="" disabled selected>País*</option>
+            <option value="España">España</option>
+            <option value="Francia">Francia</option>
+          </select>
+        </div>
+        <div class="form-group d-flex">
+          <input type="text" class="form-control d-none" id="inputFacturaDireccion2" placeholder="Dirección" />
+        </div>
+        <div class="form-group d-flex my-4">
+          <input type="text" class="form-control" id="inputFacturaCP" placeholder="Código Postal*" required />
+          <input type="text" class="form-control mx-3" id="inputFacturaCiudad" placeholder="Ciudad*" required />
+          <select class="form-control" id="selectFacturaProvincia" required>
+            <option value="" disabled selected>Provincia*</option>
+            <option value="Barcelona">Barcelona</option>
+            <option value="Madrid">Madrid</option>
+          </select>
+        </div>
+        <div class="text-center my-4">
+          <a role="button" class="biblio-btn-link mr-3 btn-prev">Pantalla anterior</a>
+          <a role="button" class="btn biblio-btn-primary px-5 ml-3 btn-next btn-paso-2">Continuar</a>
+        </div>
+      </div>
+
+      <div class="form-step">
+        <div class="row justify-content-end mb-5">
+          <div class="col-lg-8 border rounded resumenInfoCarro">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Producto</th>
+                  <th scope="col">Descripción</th>
+                  <th scope="col">Precio</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">
+                    <img src="https://dummyimage.com/50x50/000/fff" alt="" />
+                  </th>
+                  <td>
+                    <p class="biblio-font-weight-bold mb-0">
+                      Título del producto
+                    </p>
+                    <p>Libro físico</p>
+                  </td>
+                  <td class="biblio-font-weight-bold">
+                    <p>
+                      4,55 <i class="fa fa-eur" aria-hidden="true"></i> + IVA
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <img src="https://dummyimage.com/50x50/000/fff" alt="" />
+                  </th>
+                  <td>
+                    <p class="biblio-font-weight-bold mb-0">
+                      Título del producto
+                    </p>
+                    <p>Libro físico</p>
+                  </td>
+                  <td class="biblio-font-weight-bold">
+                    <p>
+                      4,55 <i class="fa fa-eur" aria-hidden="true"></i> + IVA
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <img src="https://dummyimage.com/50x50/000/fff" alt="" />
+                  </th>
+                  <td>
+                    <p class="biblio-font-weight-bold mb-0">
+                      Título del producto
+                    </p>
+                    <p>Libro físico</p>
+                  </td>
+                  <td class="biblio-font-weight-bold">
+                    <p>
+                      4,55 <i class="fa fa-eur" aria-hidden="true"></i> + IVA
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row">
+                    <img src="https://dummyimage.com/50x50/000/fff" alt="" />
+                  </th>
+                  <td>
+                    <p class="biblio-font-weight-bold mb-0">
+                      Título del producto
+                    </p>
+                    <p>Libro físico</p>
+                  </td>
+                  <td class="biblio-font-weight-bold">
+                    <p>
+                      4,55 <i class="fa fa-eur" aria-hidden="true"></i> + IVA
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="row my-2">
+              <div class="col-10 text-right">
+                <p class="biblio-font-lg text-grey">SUBTOTAL</p>
+                <p class="biblio-font-lg text-grey">IVA</p>
+                <p class="biblio-font-lg text-grey">
+                  GASTOS DE ENVÍO
+                </p>
+                <p class="biblio-h4-font-size biblio-font-weight-bold biblio-text-primary">
+                  TOTAL
+                </p>
+              </div>
+              <div class="col-2 text-right">
+                <p class="biblio-font-lg biblio-font-weight-bold">
+                  224,55 <i class="fa fa-eur" aria-hidden="true"></i>
+                </p>
+                <p class="biblio-font-lg biblio-font-weight-bold">
+                  20,00 <i class="fa fa-eur" aria-hidden="true"></i>
+                </p>
+                <p class="biblio-font-lg biblio-font-weight-bold">
+                  10,00 <i class="fa fa-eur" aria-hidden="true"></i>
+                </p>
+                <p class="biblio-h4-font-size biblio-font-weight-bold biblio-text-primary">
+                  254,55 <i class="fa fa-eur" aria-hidden="true"></i>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="border rounded m-3 p-3 resumenInfoEnvio">
+              <p class="biblio-h5-font-size biblio-font-weight-bold biblio-text-primary mb-4">Información del envío</p>
+              <p id="resumenEnvioNombre" class="text-grey"></p>
+              <p class="text-grey"><span id="resumenEnvioDireccion1"></span>,&nbsp;<span id="resumenEnvioDireccion2"></span></p>
+              <p class="text-grey"><span id="resumenEnvioCP"></span>,&nbsp;<span id="resumenEnvioCiudad"></span></p>
+              <p id="resumenEnvioPais" class="text-grey"></p>
+              <hr class="my-4">
+              <p class="text-grey"><span class="biblio-font-weight-bold">Envío:</span>&nbsp;<span id="resumenEnvio">Estándar</span></p>
+              <p class="text-grey"><span class="biblio-font-weight-bold">Pago:</span>&nbsp;<span id="resumenEnvioPago">Stripe</span></p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="text-center my-4">
+          <a role="button" class="biblio-btn-link mr-3 btn-prev">Pantalla anterior</a>
+          <input type="submit" value="Pagar" class="btn biblio-btn-primary px-5 ml-3" />
+        </div>
+      </div>
+
+      <div class="form-step text-center">
+        <p class="biblio-h4-font-size biblio-font-weight-bold biblio-text-primary py-5">Confirmación Pedido</p>
+        <div class="alert alert-secondary biblio-h2-font-size biblio-font-weight-bold text-secondary mb-5" role="alert">
+          <i class="fa fa-check-circle-o" aria-hidden="true"></i>
+          Su pedido se ha tramitado correctamente
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <!--       <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
+  <script>
+
+let checkoutForm = document.querySelector("#checkoutForm");
+const prevBtns = document.querySelectorAll(".btn-prev");
+const nextBtns = document.querySelectorAll(".btn-next");
+const progress = document.getElementById("progress");
+const formSteps = document.querySelectorAll(".form-step");
+const progressSteps = document.querySelectorAll(".progress-step");
+let btnAddLine = document.querySelector(".btn-add-line");
+let btnPaso1 = document.querySelector(".btn-paso-1");
+let btnPaso2 = document.querySelector(".btn-paso-2");
+
+//Forms inputs
+let selectDireccionEnvio = document.querySelector("#selectDireccionEnvio");
+let inputEnvioNombre = document.querySelector("#inputEnvioNombre");
+let inputEnvioDni = document.querySelector("#inputEnvioDni");
+let inputEnvioTel = document.querySelector("#inputEnvioTel");
+let inputEnvioDireccion = document.querySelector("#inputEnvioDireccion");
+let selectEnvioPais = document.querySelector("#selectEnvioPais");
+let inputEnvioDireccion2 = document.querySelector("#inputEnvioDireccion2");
+let inputEnvioCP = document.querySelector("#inputEnvioCP");
+let inputEnvioCiudad = document.querySelector("#inputEnvioCiudad");
+let selectEnvioProvincia = document.querySelector("#selectEnvioProvincia");
+let checkEnvioDatos = document.querySelector("#checkEnvioDatos");
+let inputFacturaNombre = document.querySelector("#inputFacturaNombre");
+let inputFacturaDni = document.querySelector("#inputFacturaDni");
+let inputFacturaTel = document.querySelector("#inputFacturaTel");
+let inputFacturaDireccion = document.querySelector("#inputFacturaDireccion");
+let selectFacturaPais = document.querySelector("#selectFacturaPais");
+let inputFacturaDireccion2 = document.querySelector("#inputFacturaDireccion2");
+let inputFacturaCP = document.querySelector("#inputFacturaCP");
+let inputFacturaCiudad = document.querySelector("#inputFacturaCiudad");
+let selectFacturaProvincia = document.querySelector("#selectFacturaProvincia");
+
+//Resumen Envio
+let resumenEnvioNombre = document.querySelector("#resumenEnvioNombre");
+let resumenEnvioDireccion1 = document.querySelector("#resumenEnvioDireccion1");
+let resumenEnvioDireccion2 = document.querySelector("#resumenEnvioDireccion2");
+let resumenEnvioCP = document.querySelector("#resumenEnvioCP");
+let resumenEnvioCiudad = document.querySelector("#resumenEnvioCiudad");
+let resumenEnvioPais = document.querySelector("#resumenEnvioPais");
+
+//errors
+let errors = 0;
+
+//Agenda de direcciones guardadas
+agendaDirecciones = [
+    {
+      agenda: 'Dirección 1',
+      nombre: 'Rodrigo',
+      dni: '41526396Z',
+      telefono: '99999999',
+      direccion: 'Apolo 7',
+      direccion2: '2-1',
+      pais: 'España',
+      codigoPostal: '08000',
+      ciudad: 'Barcelona',
+      provincia: 'Barcelona'
+    },
+    {
+      agenda: 'Dirección 2',
+      nombre: 'Marc',
+      dni: '5258745B',
+      telefono: '11111111',
+      direccion: 'Cent 12',
+      direccion2: '4-1',
+      pais: 'España',
+      codigoPostal: '08055',
+      ciudad: 'Badalona',
+      provincia: 'Barcelona'
+    }
+  ];
+
+let selectedOptionAgenda = '<option value="" disabled selected>Dirección</option>';
+let optionsAgenda = agendaDirecciones.map(direccion => `<option value="${direccion.agenda}">${direccion.agenda}</option>`).join('\n');
+selectDireccionEnvio.innerHTML = [selectedOptionAgenda, optionsAgenda];
+
+if(selectDireccionEnvio.value != '') {
+  let searchIndex = agendaDirecciones.findIndex((agenda) => agenda.agenda==selectDireccionEnvio.value);
+
+  inputEnvioNombre.value = agendaDirecciones[searchIndex].nombre;
+  inputEnvioDni.value = agendaDirecciones[searchIndex].dni;
+  inputEnvioTel.value = agendaDirecciones[searchIndex].telefono;
+  inputEnvioDireccion.value = agendaDirecciones[searchIndex].direccion;
+  selectEnvioPais.value = agendaDirecciones[searchIndex].pais;
+  inputEnvioDireccion2.value = agendaDirecciones[searchIndex].direccion2;
+  inputEnvioCP.value = agendaDirecciones[searchIndex].codigoPostal;
+  inputEnvioCiudad.value = agendaDirecciones[searchIndex].ciudad;
+  selectEnvioProvincia.value = agendaDirecciones[searchIndex].provincia;
+}
+
+function detectAgendaChange(agendaOnChange) {
+  if(selectDireccionEnvio.value != '') {
+    let searchIndex = agendaDirecciones.findIndex((agenda) => agenda.agenda==agendaOnChange.value);
+
+    inputEnvioNombre.value = agendaDirecciones[searchIndex].nombre;
+    inputEnvioDni.value = agendaDirecciones[searchIndex].dni;
+    inputEnvioTel.value = agendaDirecciones[searchIndex].telefono;
+    inputEnvioDireccion.value = agendaDirecciones[searchIndex].direccion;
+    selectEnvioPais.value = agendaDirecciones[searchIndex].pais;
+    inputEnvioDireccion2.value = agendaDirecciones[searchIndex].direccion2;
+    inputEnvioCP.value = agendaDirecciones[searchIndex].codigoPostal;
+    inputEnvioCiudad.value = agendaDirecciones[searchIndex].ciudad;
+    selectEnvioProvincia.value = agendaDirecciones[searchIndex].provincia;
+  }
+}
+
+
+//Steps
+let formStepsNum = 0;
+
+function botonSiguente() {          
+  formStepsNum++;
+  updateFormSteps();
+  updateProgressbar();     
+}
+
+prevBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    formStepsNum--;
+    updateFormSteps();
+    updateProgressbar();
+  });
+});
+
+function updateFormSteps() {
+  formSteps.forEach((formStep) => {
+    formStep.classList.contains("form-step-active") &&
+      formStep.classList.remove("form-step-active");
+  });
+
+  formSteps[formStepsNum].classList.add("form-step-active");
+}
+
+function updateProgressbar() {
+  progressSteps.forEach((progressStep, idx) => {
+    if (idx < formStepsNum + 1) {
+      progressStep.classList.add("progress-step-active");
+    } else {
+      progressStep.classList.remove("progress-step-active");
+    }
+  });
+
+  const progressActive = document.querySelectorAll(
+    ".progress-step-active"
+  );
+
+  progress.style.width =
+    ((progressActive.length - 1) / (progressSteps.length - 1)) * 100 +
+    "%";
+}
+
+// add address line    
+if (btnAddLine) {
+  btnAddLine.onclick = function () {
+    inputEnvioDireccion2.classList.remove("d-none");
+    inputFacturaDireccion2.classList.remove("d-none");
+    btnAddLine.classList.add("d-none");
+  };
+}
+
+//validacion
+
+function validatePaso1() {
+  errors = 0;
+  inputEnvioNombre.style.border = "";
+  inputEnvioDni.style.border = "";
+  inputEnvioTel.style.border = "";
+  inputEnvioDireccion.style.border = "";
+  selectEnvioPais.style.border = "";
+  inputEnvioCP.style.border = "";
+  inputEnvioCiudad.style.border = "";
+  selectEnvioProvincia.style.border = "";
+
+  if (inputEnvioNombre.value.trim() === '') {
+    inputEnvioNombre.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputEnvioDni.value.trim() === '') {
+    inputEnvioDni.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputEnvioTel.value.trim() === '') {
+    inputEnvioTel.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputEnvioDireccion.value.trim() === '') {
+    inputEnvioDireccion.style.border = "2px solid red";
+    errors++;
+  }
+  if (selectEnvioPais.value.trim() === '') {
+    selectEnvioPais.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputEnvioCP.value.trim() === '') {
+    inputEnvioCP.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputEnvioCiudad.value.trim() === '') {
+    inputEnvioCiudad.style.border = "2px solid red";
+    errors++;
+  }
+  if (selectEnvioProvincia.value.trim() === '') {
+    selectEnvioProvincia.style.border = "2px solid red";
+    errors++;
+  }      
+  if(errors === 0) {
+    botonSiguente();
+  }
+}
+
+function validatePaso2() {
+  errors = 0;
+  inputFacturaNombre.style.border = "";
+  inputFacturaDni.style.border = "";
+  inputFacturaTel.style.border = "";
+  inputFacturaDireccion.style.border = "";
+  selectFacturaPais.style.border = "";
+  inputFacturaCP.style.border = "";
+  inputFacturaCiudad.style.border = "";
+  selectFacturaProvincia.style.border = "";
+
+  if (inputFacturaNombre.value.trim() === '') {
+    inputFacturaNombre.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputFacturaDni.value.trim() === '') {
+    inputFacturaDni.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputFacturaTel.value.trim() === '') {
+    inputFacturaTel.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputFacturaDireccion.value.trim() === '') {
+    inputFacturaDireccion.style.border = "2px solid red";
+    errors++;
+  }
+  if (selectFacturaPais.value.trim() === '') {
+    selectFacturaPais.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputFacturaCP.value.trim() === '') {
+    inputFacturaCP.style.border = "2px solid red";
+    errors++;
+  }
+  if (inputFacturaCiudad.value.trim() === '') {
+    inputFacturaCiudad.style.border = "2px solid red";
+    errors++;
+  }
+  if (selectFacturaProvincia.value.trim() === '') {
+    selectFacturaProvincia.style.border = "2px solid red";
+    errors++;
+  }      
+  if(errors === 0) {
+    botonSiguente();
+  }
+}
+
+btnPaso1.onclick = function () {
+  //copiar datos envio a factura
+  if (checkEnvioDatos.checked == true) {
+    inputFacturaNombre.value = inputEnvioNombre.value;
+    inputFacturaDni.value = inputEnvioDni.value;
+    inputFacturaTel.value = inputEnvioTel.value;
+    inputFacturaDireccion.value = inputEnvioDireccion.value;
+    selectFacturaPais.value = selectEnvioPais.value;
+    inputFacturaDireccion2.value = inputEnvioDireccion2.value;
+    inputFacturaCP.value = inputEnvioCP.value;
+    inputFacturaCiudad.value = inputEnvioCiudad.value;
+    selectFacturaProvincia.value = selectEnvioProvincia.value;
+  }
+  //form validation
+  validatePaso1();
+}
+
+btnPaso2.onclick = function () {
+  //form validation
+  validatePaso2();
+  //copiar info de envio al resumen
+  resumenEnvioNombre.textContent = inputEnvioNombre.value;
+  resumenEnvioDireccion1.textContent = inputEnvioDireccion.value;
+  resumenEnvioDireccion2.textContent = inputEnvioDireccion2.value;
+  resumenEnvioCP.textContent = inputEnvioCP.value;
+  resumenEnvioCiudad.textContent = inputEnvioCiudad.value;
+  resumenEnvioPais.textContent = selectEnvioProvincia.value;
+}
+
+//form submition    
+checkoutForm.addEventListener('submit', e => {
+  e.preventDefault();
+  if(errors === 0) {        
+    envio = {
+      Nombre: inputEnvioNombre.value,
+      dni: inputEnvioDni.value,
+      Telefono: inputEnvioTel.value,
+      direccion: inputEnvioDireccion.value + ', ' + inputEnvioDireccion2.value,
+      pais: selectEnvioPais.value,
+      codigoPostal: inputEnvioCP.value,
+      ciudad: inputEnvioCiudad.value,
+      provincia: selectEnvioProvincia.value
+    };
+    factura = {
+      Nombre: inputFacturaNombre.value,
+      dni: inputFacturaDni.value,
+      Telefono: inputFacturaTel.value,
+      direccion: inputFacturaDireccion.value + ', ' + inputFacturaDireccion2.value,
+      pais: selectFacturaPais.value,
+      codigoPostal: inputFacturaCP.value,
+      ciudad: inputFacturaCiudad.value,
+      provincia: selectFacturaProvincia.value
+    };
+    console.log(envio, factura);
+
+    //to go to thank you page
+    botonSiguente();
+  }
+});
+  </script>
+</body>
+
+</html>
